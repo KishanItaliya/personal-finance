@@ -2,6 +2,8 @@
 
 A modern, secure, and user-friendly personal finance management application built with Next.js, TypeScript, and Tailwind CSS.
 
+[![GitHub](https://img.shields.io/badge/GitHub-Repository-blue)](https://github.com/KishanItaliya/personal-finance)
+
 ## Features
 
 - 🔐 Secure authentication with NextAuth.js
@@ -31,8 +33,8 @@ A modern, secure, and user-friendly personal finance management application buil
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/yourusername/personal-finance-dashboard.git
-   cd personal-finance-dashboard
+   git clone https://github.com/KishanItaliya/personal-finance.git
+   cd personal-finance
    ```
 
 2. **Install dependencies**
@@ -93,4 +95,4 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ## Support
 
-If you encounter any issues or have questions, please open an issue in the GitHub repository.
+If you encounter any issues or have questions, please open an issue in the [GitHub repository](https://github.com/KishanItaliya/personal-finance).
