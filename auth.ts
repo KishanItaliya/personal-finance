@@ -1,4 +1,3 @@
-// auth.ts (in root directory)
 import NextAuth from "next-auth";
 import type { NextAuthConfig } from "next-auth";
 import type { User } from "next-auth";

@@ -1,4 +1,3 @@
-// app/api/auth/[...nextauth]/route.ts
 import { handlers } from "@/auth";
 import { NextRequest } from "next/server";
 

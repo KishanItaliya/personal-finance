@@ -1,4 +1,3 @@
-// app/dashboard/page.tsx (continued)
 import { auth } from '@/auth';
 import { redirect } from 'next/navigation';
 import { prisma } from '@/lib/prisma';
@@ -126,7 +125,7 @@ export default async function DashboardPage() {
                   <p className="mt-1 text-sm text-gray-500">Your last 5 transactions</p>
                 </div>
                 <Link
-                  href="/dashboard/transactions/new"
+                  href="/dashboard/transactions/create"
                   className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                 >
                   Add Transaction
@@ -220,7 +219,7 @@ export default async function DashboardPage() {
                 <ul className="space-y-3">
                   <li>
                     <Link
-                      href="/dashboard/transactions/new"
+                      href="/dashboard/transactions/create"
                       className="text-indigo-600 hover:text-indigo-500 font-medium"
                     >
                       Add a new transaction
@@ -228,7 +227,7 @@ export default async function DashboardPage() {
                   </li>
                   <li>
                     <Link
-                      href="/dashboard/accounts/new"
+                      href="/dashboard/accounts/create"
                       className="text-indigo-600 hover:text-indigo-500 font-medium"
                     >
                       Create a new account
