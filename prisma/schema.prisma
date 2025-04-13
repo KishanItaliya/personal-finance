@@ -1,0 +1,205 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                    String    @id @default(uuid())
+  email                 String    @unique
+  passwordHash          String
+  firstName             String
+  lastName              String
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+  currencyPreference    String    @default("USD")
+  emailVerified         Boolean   @default(false)
+  notificationPreferences Json?
+
+  // Relations
+  accounts              Account[]
+  transactions          Transaction[]
+  budgets               Budget[]
+  goals                 Goal[]
+  categories            Category[]
+
+  @@map("users")
+}
+
+model Account {
+  id              String    @id @default(uuid())
+  userId          String
+  name            String
+  type            AccountType
+  balance         Decimal   @db.Decimal(10, 2)
+  institution     String?
+  accountNumber   String?
+  isActive        Boolean   @default(true)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  interestRate    Decimal?  @db.Decimal(5, 2)
+  creditLimit     Decimal?  @db.Decimal(10, 2)
+  lastSync        DateTime?
+
+  // Relations
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transactions    Transaction[]
+
+  @@index([userId])
+  @@map("accounts")
+}
+
+model Transaction {
+  id              String    @id @default(uuid())
+  userId          String
+  accountId       String
+  categoryId      String?
+  amount          Decimal   @db.Decimal(10, 2)
+  date            DateTime
+  description     String
+  type            TransactionType
+  isRecurring     Boolean   @default(false)
+  merchant        String?
+  status          TransactionStatus @default(COMPLETED)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  metadata        Json?
+  receiptUrl      String?
+
+  // Relations
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  account         Account   @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  category        Category? @relation(fields: [categoryId], references: [id])
+
+  @@index([userId])
+  @@index([accountId])
+  @@index([categoryId])
+  @@index([date])
+  @@map("transactions")
+}
+
+model Category {
+  id                String    @id @default(uuid())
+  userId            String
+  name              String
+  type              CategoryType
+  color             String?
+  icon              String?
+  isDefault         Boolean   @default(false)
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  parentCategoryId  String?
+
+  // Relations
+  user              User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  parentCategory    Category? @relation("CategoryToSubcategory", fields: [parentCategoryId], references: [id])
+  subcategories     Category[] @relation("CategoryToSubcategory")
+  transactions      Transaction[]
+  budgetCategories  BudgetCategory[]
+
+  @@index([userId])
+  @@map("categories")
+}
+
+model Budget {
+  id                String    @id @default(uuid())
+  userId            String
+  name              String
+  startDate         DateTime
+  endDate           DateTime
+  totalAmount       Decimal   @db.Decimal(10, 2)
+  period            BudgetPeriod
+  isActive          Boolean   @default(true)
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  // Relations
+  user              User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  budgetCategories  BudgetCategory[]
+
+  @@index([userId])
+  @@map("budgets")
+}
+
+model BudgetCategory {
+  id              String    @id @default(uuid())
+  budgetId        String
+  categoryId      String
+  plannedAmount   Decimal   @db.Decimal(10, 2)
+  actualAmount    Decimal   @db.Decimal(10, 2) @default(0)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  // Relations
+  budget          Budget    @relation(fields: [budgetId], references: [id], onDelete: Cascade)
+  category        Category  @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@index([budgetId])
+  @@index([categoryId])
+  @@map("budget_categories")
+}
+
+model Goal {
+  id              String    @id @default(uuid())
+  userId          String
+  name            String
+  description     String?
+  targetAmount    Decimal   @db.Decimal(10, 2)
+  currentAmount   Decimal   @db.Decimal(10, 2) @default(0)
+  targetDate      DateTime
+  priority        GoalPriority @default(MEDIUM)
+  isCompleted     Boolean   @default(false)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  icon            String?
+
+  // Relations
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("goals")
+}
+
+enum AccountType {
+  CHECKING
+  SAVINGS
+  CREDIT
+  INVESTMENT
+  CASH
+  OTHER
+}
+
+enum TransactionType {
+  INCOME
+  EXPENSE
+  TRANSFER
+}
+
+enum TransactionStatus {
+  PENDING
+  COMPLETED
+  FAILED
+}
+
+enum CategoryType {
+  INCOME
+  EXPENSE
+}
+
+enum BudgetPeriod {
+  WEEKLY
+  MONTHLY
+  YEARLY
+}
+
+enum GoalPriority {
+  LOW
+  MEDIUM
+  HIGH
+}
