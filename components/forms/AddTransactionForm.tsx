@@ -146,7 +146,7 @@ export default function AddTransactionForm({
                         defaultValue={field.value}
                       >
                         <FormControl>
-                          <SelectTrigger className="w-full">
+                          <SelectTrigger className="w-full cursor-pointer">
                             <SelectValue placeholder="Select Type" />
                           </SelectTrigger>
                         </FormControl>
@@ -173,7 +173,7 @@ export default function AddTransactionForm({
                         defaultValue={field.value}
                       >
                         <FormControl>
-                          <SelectTrigger className="w-full">
+                          <SelectTrigger className="w-full cursor-pointer">
                             <SelectValue placeholder="Select Account" />
                           </SelectTrigger>
                         </FormControl>
@@ -202,7 +202,7 @@ export default function AddTransactionForm({
                         defaultValue={field.value}
                       >
                         <FormControl>
-                          <SelectTrigger className="w-full">
+                          <SelectTrigger className="w-full cursor-pointer">
                             <SelectValue placeholder="Select Category" />
                           </SelectTrigger>
                         </FormControl>

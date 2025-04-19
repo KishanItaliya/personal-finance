@@ -12,6 +12,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Plus } from "lucide-react";
 import { dashboardRoutes, quickActionRoutes } from '@/lib/routes';
+import { formatCurrency, isPositiveAmount } from '@/lib/utils';
 
 export default async function DashboardPage() {
   const session = await auth();
@@ -45,6 +46,7 @@ export default async function DashboardPage() {
     },
     take: 5,
   });
+  
   // Calculate total balance
   const totalBalance = accounts.reduce((sum, account) => sum + Number(account.balance), 0);
   
@@ -56,7 +58,7 @@ export default async function DashboardPage() {
         <CardHeader className="pb-3">
           <CardTitle>Account Overview</CardTitle>
           <CardDescription>
-            Your total balance: ${totalBalance?.toFixed(2)}
+            Your total balance: {formatCurrency(totalBalance)}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -68,7 +70,7 @@ export default async function DashboardPage() {
                     {account.name}
                   </div>
                   <div className="mt-1 text-2xl font-semibold">
-                    ${account.balance.toFixed(2)}
+                    {formatCurrency(Number(account.balance))}
                   </div>
                 </CardContent>
               </Card>
@@ -94,25 +96,28 @@ export default async function DashboardPage() {
           <CardContent>
             {recentTransactions.length > 0 ? (
               <div className="space-y-3">
-                {recentTransactions.map((transaction) => (
-                  <div key={transaction.id} className="flex justify-between items-center border-b pb-3">
-                    <div className="flex flex-col">
-                      <span className="font-medium">{transaction.description}</span>
-                      <div className="flex items-center text-sm text-muted-foreground">
-                        <span>{new Date(transaction.date).toLocaleDateString()}</span>
-                        <span className="mx-2">•</span>
-                        <span>{transaction?.category?.name}</span>
+                {recentTransactions.map((transaction) => {
+                  const transactionAmount = Number(transaction.amount);
+                  return (
+                    <div key={transaction.id} className="flex justify-between items-center border-b pb-3">
+                      <div className="flex flex-col">
+                        <span className="font-medium">{transaction.description}</span>
+                        <div className="flex items-center text-sm text-muted-foreground">
+                          <span>{new Date(transaction.date).toLocaleDateString()}</span>
+                          <span className="mx-2">•</span>
+                          <span>{transaction?.category?.name}</span>
+                        </div>
                       </div>
+                      <span className={`font-medium ${
+                        isPositiveAmount(transactionAmount)
+                          ? 'text-green-600' 
+                          : 'text-red-600'
+                      }`}>
+                        {formatCurrency(Math.abs(transactionAmount))}
+                      </span>
                     </div>
-                    <span className={`font-medium ${
-                      Number(transaction?.amount) >= 0 
-                        ? 'text-green-600' 
-                        : 'text-red-600'
-                    }`}>
-                      ${Math.abs(Number(transaction.amount)).toFixed(2)}
-                    </span>
-                  </div>
-                ))}
+                  );
+                })}
                 <div className="flex justify-end mt-3 pt-2">
                   <Button variant="ghost" asChild size="sm">
                     <Link href={dashboardRoutes.transactions.index} className="flex items-center">
@@ -130,7 +135,7 @@ export default async function DashboardPage() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="h-fit">
           <CardHeader>
             <CardTitle>Quick Actions</CardTitle>
             <CardDescription>Common tasks to manage your finances</CardDescription>
