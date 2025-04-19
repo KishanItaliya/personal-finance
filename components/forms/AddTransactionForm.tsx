@@ -34,6 +34,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
+import { toast } from 'sonner';
 
 type Account = {
   id: string;
@@ -113,16 +114,18 @@ export default function AddTransactionForm({
 
       // Reset form and refresh data
       form.reset();
-      router.refresh();
+      router.push('/dashboard/transactions');
+      toast.success('Transaction added successfully');
     } catch (error) {
       console.error('Error adding transaction:', error);
+      toast.error('Failed to add transaction');
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="w-full max-w-4xl mx-auto">
+    <div className="w-full">
       <Card>
         <CardHeader>
           <CardTitle>Add New Transaction</CardTitle>
@@ -275,6 +278,7 @@ export default function AddTransactionForm({
                             selected={field.value}
                             onSelect={field.onChange}
                             initialFocus
+                            disabled={(date) => date > new Date()}
                           />
                         </PopoverContent>
                       </Popover>

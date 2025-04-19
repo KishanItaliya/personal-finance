@@ -14,6 +14,7 @@ import {
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
 import { Home, Plus } from 'lucide-react';
+import { dashboardRoutes } from '@/lib/routes';
 
 interface RouteSegment {
   name: string;
@@ -58,7 +59,7 @@ export function DashboardHeader({ showAddTransactionButton = true }: DashboardHe
       <Breadcrumb>
         <BreadcrumbList>
           <BreadcrumbItem>
-            <BreadcrumbLink href="/dashboard">
+            <BreadcrumbLink href={dashboardRoutes.index}>
               <Home className="h-4 w-4" />
             </BreadcrumbLink>
           </BreadcrumbItem>
@@ -83,7 +84,7 @@ export function DashboardHeader({ showAddTransactionButton = true }: DashboardHe
       {showAddTransactionButton && (
         <div className="ml-auto">
           <Button size="sm" variant="outline" asChild>
-            <Link href="/dashboard/transactions/create">
+            <Link href={dashboardRoutes.transactions.create}>
               <Plus className="mr-2 h-4 w-4" />
               Add Transaction
             </Link>

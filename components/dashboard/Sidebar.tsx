@@ -20,60 +20,9 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { 
-  BarChart3, 
-  CreditCard, 
-  LayoutDashboard, 
-  ListChecks, 
-  Target, 
-  User, 
-  Calculator,
-} from "lucide-react";
+import { User } from "lucide-react";
 import LogoutButton from '@/components/ui/LogoutButton';
-
-type NavItem = {
-  path: string;
-  label: string;
-  icon: React.ReactNode;
-};
-
-const navItems: NavItem[] = [
-  {
-    path: '/dashboard',
-    label: 'Dashboard',
-    icon: <LayoutDashboard className="mx-2 h-5 w-5" />,
-  },
-  {
-    path: '/dashboard/transactions',
-    label: 'Transactions',
-    icon: <ListChecks className="mx-2 h-5 w-5" />,
-  },
-  {
-    path: '/dashboard/accounts',
-    label: 'Accounts',
-    icon: <CreditCard className="mx-2 h-5 w-5" />,
-  },
-  {
-    path: '/dashboard/categories',
-    label: 'Categories',
-    icon: <Calculator className="mx-2 h-5 w-5" />,
-  },
-  {
-    path: '/dashboard/budgets',
-    label: 'Budgets',
-    icon: <ListChecks className="mx-2 h-5 w-5" />,
-  },
-  {
-    path: '/dashboard/goals',
-    label: 'Goals',
-    icon: <Target className="mx-2 h-5 w-5" />,
-  },
-  {
-    path: '/dashboard/reports',
-    label: 'Reports',
-    icon: <BarChart3 className="mx-2 h-5 w-5" />,
-  },
-];
+import { navItems, userMenuItems } from '@/lib/routes';
 
 interface DashboardSidebarProps {
   user: {
@@ -92,16 +41,19 @@ export function DashboardSidebar({ user }: DashboardSidebarProps) {
       </SidebarHeader>
       <SidebarContent>
         <SidebarMenu>
-          {navItems.map((item) => (
-            <SidebarMenuItem key={item.path}>
-              <SidebarMenuButton asChild isActive={pathname === item.path}>
-                <Link href={item.path} className="flex items-center">
-                  {item.icon}
-                  {item.label}
-                </Link>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-          ))}
+          {navItems.map((item) => {
+            const Icon = item.icon;
+            return (
+              <SidebarMenuItem key={item.path}>
+                <SidebarMenuButton asChild isActive={pathname === item.path}>
+                  <Link href={item.path} className="flex items-center">
+                    <Icon className="mx-2 h-5 w-5" />
+                    {item.label}
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            );
+          })}
         </SidebarMenu>
       </SidebarContent>
       <SidebarFooter className="border-t p-4">
@@ -115,16 +67,21 @@ export function DashboardSidebar({ user }: DashboardSidebarProps) {
           <DropdownMenuContent align="start" className="w-56">
             <DropdownMenuLabel>My Account</DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem asChild>
-              <Link href="/profile">Profile</Link>
-            </DropdownMenuItem>
-            <DropdownMenuItem asChild>
-              <Link href="/settings">Settings</Link>
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem>
-              <LogoutButton />
-            </DropdownMenuItem>
+            {userMenuItems.map((item) => {
+              if (item.isLogout) {
+                return (
+                  <DropdownMenuItem key={item.path}>
+                    <LogoutButton />
+                  </DropdownMenuItem>
+                );
+              }
+              
+              return (
+                <DropdownMenuItem key={item.path} asChild>
+                  <Link href={item.path}>{item.label}</Link>
+                </DropdownMenuItem>
+              );
+            })}
           </DropdownMenuContent>
         </DropdownMenu>
       </SidebarFooter>

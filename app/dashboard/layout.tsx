@@ -3,6 +3,7 @@ import { auth } from '@/auth';
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { DashboardSidebar } from '@/components/dashboard/Sidebar';
 import { DashboardHeader } from '@/components/dashboard/Header';
+import { authRoutes } from '@/lib/routes';
 
 export default async function DashboardLayout({
   children,
@@ -12,7 +13,7 @@ export default async function DashboardLayout({
   const session = await auth();
   
   if (!session || !session.user) {
-    redirect('/login');
+    redirect(authRoutes.login);
   }
   
   return (
@@ -24,7 +25,7 @@ export default async function DashboardLayout({
           <DashboardHeader />
           
           <div className="flex-1 overflow-auto">
-            <div className="px-6 py-6 max-w-6xl mx-auto w-full">
+            <div className="px-6 py-6 max-w-7xl mx-auto w-full">
               {children}
             </div>
           </div>

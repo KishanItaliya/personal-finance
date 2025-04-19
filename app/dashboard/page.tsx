@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Plus } from "lucide-react";
+import { dashboardRoutes, quickActionRoutes } from '@/lib/routes';
 
 export default async function DashboardPage() {
   const session = await auth();
@@ -84,7 +85,7 @@ export default async function DashboardPage() {
               <CardDescription>Your last 5 transactions</CardDescription>
             </div>
             <Button asChild size="sm" variant="outline">
-              <Link href="/dashboard/transactions/create">
+              <Link href={dashboardRoutes.transactions.create}>
                 <Plus className="h-4 w-4 mr-2" />
                 Add
               </Link>
@@ -114,7 +115,7 @@ export default async function DashboardPage() {
                 ))}
                 <div className="flex justify-end mt-3 pt-2">
                   <Button variant="ghost" asChild size="sm">
-                    <Link href="/dashboard/transactions" className="flex items-center">
+                    <Link href={dashboardRoutes.transactions.index} className="flex items-center">
                       View all
                       <ArrowRight className="ml-2 h-4 w-4" />
                     </Link>
@@ -136,30 +137,22 @@ export default async function DashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="grid gap-2">
-              <Button asChild variant="outline" className="justify-start">
-                <Link href="/dashboard/transactions/create">
-                  <Plus className="mr-2 h-4 w-4" />
-                  Add a new transaction
-                </Link>
-              </Button>
-              <Button asChild variant="outline" className="justify-start">
-                <Link href="/dashboard/accounts/create">
-                  <Plus className="mr-2 h-4 w-4" />
-                  Create a new account
-                </Link>
-              </Button>
-              <Button asChild variant="outline" className="justify-start">
-                <Link href="/dashboard/categories">
-                  <Plus className="mr-2 h-4 w-4" />
-                  Manage your categories
-                </Link>
-              </Button>
-              <Button asChild variant="outline" className="justify-start">
-                <Link href="/dashboard/reports">
-                  <Plus className="mr-2 h-4 w-4" />
-                  View financial reports
-                </Link>
-              </Button>
+              {quickActionRoutes.map((action) => {
+                const Icon = action.icon;
+                return (
+                  <Button 
+                    key={action.path}
+                    asChild 
+                    variant="outline" 
+                    className="justify-start"
+                  >
+                    <Link href={action.path}>
+                      <Icon className="mr-2 h-4 w-4" />
+                      {action.label}
+                    </Link>
+                  </Button>
+                );
+              })}
             </div>
           </CardContent>
         </Card>
