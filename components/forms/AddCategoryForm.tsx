@@ -2,9 +2,27 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useForm, Controller } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 type CategoryParent = {
   id: string;
@@ -35,13 +53,7 @@ export default function AddCategoryForm({
   const [isLoading, setIsLoading] = useState(false);
   
   // Initialize react-hook-form
-  const {
-    control,
-    handleSubmit,
-    watch,
-    reset,
-    formState: { errors }
-  } = useForm<CategoryFormValues>({
+  const form = useForm<CategoryFormValues>({
     resolver: zodResolver(categorySchema),
     defaultValues: {
       name: '',
@@ -53,7 +65,7 @@ export default function AddCategoryForm({
   });
   
   // Watch the category type to filter parent categories
-  const categoryType = watch('type');
+  const categoryType = form.watch('type');
 
   const onSubmit = async (data: CategoryFormValues) => {
     setIsLoading(true);
@@ -72,7 +84,7 @@ export default function AddCategoryForm({
       }
 
       // Reset form and refresh data
-      reset();
+      form.reset();
       router.refresh();
       router.push('/dashboard/categories');
     } catch (error) {
@@ -102,123 +114,141 @@ export default function AddCategoryForm({
   );
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 p-4 bg-white rounded-lg shadow">
-      <h2 className="text-xl font-semibold">Add New Category</h2>
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700">Category Name</label>
-          <Controller
-            name="name"
-            control={control}
-            render={({ field }) => (
-              <input
-                type="text"
-                {...field}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                placeholder="e.g., Groceries, Rent, Salary"
+    <Card>
+      <CardHeader>
+        <CardTitle>Add New Category</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Category Name</FormLabel>
+                    <FormControl>
+                      <Input 
+                        {...field}
+                        placeholder="e.g., Groceries, Rent, Salary" 
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-            )}
-          />
-          {errors.name && (
-            <p className="mt-1 text-sm text-red-600">{errors.name.message}</p>
-          )}
-        </div>
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700">Category Type</label>
-          <Controller
-            name="type"
-            control={control}
-            render={({ field }) => (
-              <select
-                {...field}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-              >
-                <option value="EXPENSE">Expense</option>
-                <option value="INCOME">Income</option>
-              </select>
-            )}
-          />
-          {errors.type && (
-            <p className="mt-1 text-sm text-red-600">{errors.type.message}</p>
-          )}
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700">Color</label>
-          <Controller
-            name="color"
-            control={control}
-            render={({ field }) => (
-              <div className="mt-1 grid grid-cols-5 gap-2">
-                {colorOptions.map((color) => (
-                  <div
-                    key={color.value}
-                    onClick={() => field.onChange(color.value)}
-                    className={`w-8 h-8 rounded-full cursor-pointer border-2 ${
-                      field.value === color.value
-                        ? 'border-gray-800'
-                        : 'border-transparent'
-                    }`}
-                    style={{ backgroundColor: color.value }}
-                    title={color.label}
-                  ></div>
-                ))}
-              </div>
-            )}
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700">Icon (optional)</label>
-          <Controller
-            name="icon"
-            control={control}
-            render={({ field }) => (
-              <input
-                type="text"
-                {...field}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                placeholder="Icon name or emoji"
+              <FormField
+                control={form.control}
+                name="type"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Category Type</FormLabel>
+                    <Select 
+                      onValueChange={field.onChange} 
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select Category Type" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="EXPENSE">Expense</SelectItem>
+                        <SelectItem value="INCOME">Income</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-            )}
-          />
-        </div>
 
-        {filteredParentCategories.length > 0 && (
-          <div className="col-span-full">
-            <label className="block text-sm font-medium text-gray-700">Parent Category (optional)</label>
-            <Controller
-              name="parentCategoryId"
-              control={control}
-              render={({ field }) => (
-                <select
-                  {...field}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                >
-                  <option value="">None (Top Level Category)</option>
-                  {filteredParentCategories.map((category) => (
-                    <option key={category.id} value={category.id}>
-                      {category.name}
-                    </option>
-                  ))}
-                </select>
+              <FormField
+                control={form.control}
+                name="color"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Color</FormLabel>
+                    <FormControl>
+                      <div className="mt-1 grid grid-cols-5 gap-2">
+                        {colorOptions.map((color) => (
+                          <div
+                            key={color.value}
+                            onClick={() => field.onChange(color.value)}
+                            className={`w-8 h-8 rounded-full cursor-pointer border-2 ${
+                              field.value === color.value
+                                ? 'border-gray-800'
+                                : 'border-transparent'
+                            }`}
+                            style={{ backgroundColor: color.value }}
+                            title={color.label}
+                          ></div>
+                        ))}
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="icon"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Icon (optional)</FormLabel>
+                    <FormControl>
+                      <Input 
+                        {...field}
+                        placeholder="Icon name or emoji" 
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {filteredParentCategories.length > 0 && (
+                <FormField
+                  control={form.control}
+                  name="parentCategoryId"
+                  render={({ field }) => (
+                    <FormItem className="col-span-full">
+                      <FormLabel>Parent Category (optional)</FormLabel>
+                      <Select 
+                        onValueChange={field.onChange} 
+                        defaultValue={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="None (Top Level Category)" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="">None (Top Level Category)</SelectItem>
+                          {filteredParentCategories.map((category) => (
+                            <SelectItem key={category.id} value={category.id}>
+                              {category.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
               )}
-            />
-          </div>
-        )}
-      </div>
+            </div>
 
-      <div className="flex justify-end">
-        <button
-          type="submit"
-          disabled={isLoading}
-          className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
-        >
-          {isLoading ? 'Saving...' : 'Add Category'}
-        </button>
-      </div>
-    </form>
+            <div className="flex justify-end">
+              <Button type="submit" disabled={isLoading}>
+                {isLoading ? 'Saving...' : 'Add Category'}
+              </Button>
+            </div>
+          </form>
+        </Form>
+      </CardContent>
+    </Card>
   );
 } 

@@ -3,6 +3,42 @@ import { redirect } from 'next/navigation';
 import { prisma } from '@/lib/prisma';
 import LogoutButton from '@/components/ui/LogoutButton';
 import Link from 'next/link';
+import { 
+  Card, 
+  CardContent, 
+  CardDescription, 
+  CardHeader, 
+  CardTitle 
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import {
+  SidebarProvider,
+  Sidebar,
+  SidebarTrigger,
+  SidebarContent,
+  SidebarHeader,
+  SidebarMenu,
+  SidebarMenuItem,
+  SidebarMenuButton,
+  SidebarFooter,
+} from "@/components/ui/sidebar";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { ArrowRight, BarChart3, CreditCard, Home, LayoutDashboard, ListChecks, Plus, User } from "lucide-react";
 
 export default async function DashboardPage() {
   const session = await auth();
@@ -40,221 +76,231 @@ export default async function DashboardPage() {
   const totalBalance = accounts.reduce((sum, account) => sum + Number(account.balance), 0);
   
   return (
-    <div className="min-h-screen bg-gray-100">
-      <nav className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16">
-            <div className="flex">
-              <div className="flex-shrink-0 flex items-center">
-                <span className="text-xl font-bold text-indigo-600">Financial Tracker</span>
-              </div>
-              <div className="hidden sm:-my-px sm:ml-6 sm:flex sm:space-x-8">
-                <Link 
-                  href="/dashboard" 
-                  className="border-indigo-500 text-gray-900 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
-                >
-                  Dashboard
-                </Link>
-                <Link 
-                  href="/dashboard/transactions" 
-                  className="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
-                >
-                  Transactions
-                </Link>
-                <Link 
-                  href="/dashboard/accounts" 
-                  className="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
-                >
-                  Accounts
-                </Link>
-                <Link 
-                  href="/dashboard/categories" 
-                  className="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
-                >
-                  Categories
-                </Link>
-              </div>
-            </div>
-            <div className="hidden sm:ml-6 sm:flex sm:items-center">
-              <div className="ml-3 relative">
-                <div className="flex items-center">
-                  <span className="text-sm font-medium text-gray-700 mr-4">
-                    {session.user.name || session.user.email}
-                  </span>
+    <SidebarProvider>
+      <div className="flex h-screen w-full">
+        {/* Sidebar */}
+        <Sidebar>
+          <SidebarHeader className="flex h-16 items-start px-4">
+            <span className="text-xl font-bold text-primary pt-2.5">Finance Tracker</span>
+          </SidebarHeader>
+          <SidebarContent>
+            <SidebarMenu>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild isActive={true}>
+                  <Link href="/dashboard" className="flex items-center">
+                    <LayoutDashboard className="mx-2 h-5 w-5" />
+                    Dashboard
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild>
+                  <Link href="/dashboard/transactions" className="flex items-center">
+                    <ListChecks className="mx-2 h-5 w-5" />
+                    Transactions
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild>
+                  <Link href="/dashboard/accounts" className="flex items-center">
+                    <CreditCard className="mx-2 h-5 w-5" />
+                    Accounts
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild>
+                  <Link href="/dashboard/categories" className="flex items-center">
+                    <ListChecks className="mx-2 h-5 w-5" />
+                    Categories
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild>
+                  <Link href="/dashboard/reports" className="flex items-center">
+                    <BarChart3 className="mx-2 h-5 w-5" />
+                    Reports
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            </SidebarMenu>
+          </SidebarContent>
+          <SidebarFooter className="border-t p-4">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="sm" className="h-9 w-full justify-start gap-2">
+                  <User className="h-4 w-4" />
+                  {session.user.name || session.user.email}
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="w-56">
+                <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem asChild>
+                  <Link href="/profile">Profile</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link href="/settings">Settings</Link>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem>
                   <LogoutButton />
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </nav>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </SidebarFooter>
+        </Sidebar>
 
-      <main className="py-6">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h1 className="text-2xl font-semibold text-gray-900">Dashboard</h1>
-          
-          <div className="mt-6">
-            <div className="bg-white shadow overflow-hidden sm:rounded-lg p-6">
-              <h2 className="text-lg font-medium text-gray-900">Account Overview</h2>
-              <p className="mt-1 text-sm text-gray-500">
-                Your total balance: ${totalBalance?.toFixed(2)}
-              </p>
-              
-              <div className="mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-                {accounts?.map((account) => (
-                  <div key={account.id} className="bg-gray-50 overflow-hidden shadow rounded-lg">
-                    <div className="px-4 py-5 sm:p-6">
-                      <dt className="text-sm font-medium text-gray-500 truncate">
-                        {account.name}
-                      </dt>
-                      <dd className="mt-1 text-3xl font-semibold text-gray-900">
-                        ${account.balance.toFixed(2)}
-                      </dd>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-          
-          <div className="mt-8">
-            <div className="bg-white shadow overflow-hidden sm:rounded-lg">
-              <div className="px-4 py-5 sm:px-6 flex justify-between items-center">
-                <div>
-                  <h2 className="text-lg font-medium text-gray-900">Recent Transactions</h2>
-                  <p className="mt-1 text-sm text-gray-500">Your last 5 transactions</p>
-                </div>
-                <Link
-                  href="/dashboard/transactions/create"
-                  className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                >
+        {/* Main content */}
+        <div className="flex-1 flex flex-col">
+          <div className="flex h-16 items-center gap-4 border-b px-6 shrink-0">
+            <SidebarTrigger />
+            <Breadcrumb>
+              <BreadcrumbList>
+                <BreadcrumbItem>
+                  <BreadcrumbLink href="/dashboard">
+                    <Home className="h-4 w-4" />
+                  </BreadcrumbLink>
+                </BreadcrumbItem>
+                <BreadcrumbSeparator />
+                <BreadcrumbItem>
+                  <BreadcrumbPage>Dashboard</BreadcrumbPage>
+                </BreadcrumbItem>
+              </BreadcrumbList>
+            </Breadcrumb>
+            <div className="ml-auto">
+              <Button size="sm" variant="outline" asChild>
+                <Link href="/dashboard/transactions/create">
+                  <Plus className="mr-2 h-4 w-4" />
                   Add Transaction
                 </Link>
-              </div>
-              <div className="border-t border-gray-200">
-                <div className="bg-gray-50 px-4 py-3 sm:grid sm:grid-cols-4 sm:gap-4 sm:px-6 font-medium text-xs text-gray-500 uppercase tracking-wider">
-                  <div>Date</div>
-                  <div>Description</div>
-                  <div>Category</div>
-                  <div>Amount</div>
-                </div>
-                <ul className="divide-y divide-gray-200">
-                  {recentTransactions.length > 0 ? (
-                    recentTransactions.map((transaction) => (
-                      <li key={transaction.id}>
-                        <div className="px-4 py-4 sm:px-6 sm:grid sm:grid-cols-4 sm:gap-4">
-                          <div className="text-sm text-gray-900">
-                            {new Date(transaction.date).toLocaleDateString()}
-                          </div>
-                          <div className="text-sm text-gray-900">
-                            {transaction.description}
-                          </div>
-                          <div className="text-sm text-gray-500">
-                            {transaction?.category?.name}
-                          </div>
-                          <div className={`text-sm font-medium ${
-                            Number(transaction?.amount) >= 0 
-                              ? 'text-green-600' 
-                              : 'text-red-600'
-                          }`}>
-                            ${Math.abs(Number(transaction.amount)).toFixed(2)}
-                          </div>
-                        </div>
-                      </li>
-                    ))
-                  ) : (
-                    <li className="px-4 py-5 sm:px-6 text-sm text-gray-500 text-center">
-                      No transactions found. Add your first transaction to get started.
-                    </li>
-                  )}
-                </ul>
-              </div>
-              {recentTransactions.length > 0 && (
-                <div className="px-4 py-4 sm:px-6 text-right">
-                  <Link
-                    href="/dashboard/transactions"
-                    className="text-sm font-medium text-indigo-600 hover:text-indigo-500"
-                  >
-                    View all transactions <span aria-hidden="true">→</span>
-                  </Link>
-                </div>
-              )}
+              </Button>
             </div>
           </div>
-          
-          <div className="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-2">
-            <div className="bg-white shadow overflow-hidden sm:rounded-lg">
-              <div className="px-4 py-5 sm:px-6">
-                <h2 className="text-lg font-medium text-gray-900">Quick Analysis</h2>
-                <p className="mt-1 text-sm text-gray-500">Financial health indicators</p>
-              </div>
-              <div className="border-t border-gray-200 px-4 py-5 sm:p-6">
-                <div className="space-y-4">
-                  <div>
-                    <h3 className="text-sm font-medium text-gray-500">Spending Trend</h3>
-                    <p className="mt-1 text-lg font-semibold text-gray-900">
-                      {recentTransactions.length === 0 
-                        ? "Not enough data" 
-                        : "Your spending is stable compared to last month"}
-                    </p>
+
+          <div className="flex-1 overflow-auto">
+            <div className="px-6 py-6 max-w-6xl mx-auto w-full">
+              <h1 className="text-2xl font-bold mb-6">Dashboard</h1>
+              
+              <Card className="mb-6">
+                <CardHeader className="pb-3">
+                  <CardTitle>Account Overview</CardTitle>
+                  <CardDescription>
+                    Your total balance: ${totalBalance?.toFixed(2)}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                    {accounts?.map((account) => (
+                      <Card key={account.id} className="bg-accent/10">
+                        <CardContent className="p-4">
+                          <div className="text-sm font-medium text-muted-foreground">
+                            {account.name}
+                          </div>
+                          <div className="mt-1 text-2xl font-semibold">
+                            ${account.balance.toFixed(2)}
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
                   </div>
-                  <div>
-                    <h3 className="text-sm font-medium text-gray-500">Savings Rate</h3>
-                    <p className="mt-1 text-lg font-semibold text-gray-900">
-                      {recentTransactions.length === 0
-                        ? "Not enough data"
-                        : "Add your income to calculate savings rate"}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-            
-            <div className="bg-white shadow overflow-hidden sm:rounded-lg">
-              <div className="px-4 py-5 sm:px-6">
-                <h2 className="text-lg font-medium text-gray-900">Quick Links</h2>
-                <p className="mt-1 text-sm text-gray-500">Common actions to get started</p>
-              </div>
-              <div className="border-t border-gray-200 px-4 py-5 sm:p-6">
-                <ul className="space-y-3">
-                  <li>
-                    <Link
-                      href="/dashboard/transactions/create"
-                      className="text-indigo-600 hover:text-indigo-500 font-medium"
-                    >
-                      Add a new transaction
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      href="/dashboard/accounts/create"
-                      className="text-indigo-600 hover:text-indigo-500 font-medium"
-                    >
-                      Create a new account
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      href="/dashboard/categories"
-                      className="text-indigo-600 hover:text-indigo-500 font-medium"
-                    >
-                      Manage your categories
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      href="/dashboard/reports"
-                      className="text-indigo-600 hover:text-indigo-500 font-medium"
-                    >
-                      View financial reports
-                    </Link>
-                  </li>
-                </ul>
+                </CardContent>
+              </Card>
+              
+              <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
+                    <div>
+                      <CardTitle>Recent Transactions</CardTitle>
+                      <CardDescription>Your last 5 transactions</CardDescription>
+                    </div>
+                    <Button asChild size="sm" variant="outline">
+                      <Link href="/dashboard/transactions/create">
+                        <Plus className="h-4 w-4 mr-2" />
+                        Add
+                      </Link>
+                    </Button>
+                  </CardHeader>
+                  <CardContent>
+                    {recentTransactions.length > 0 ? (
+                      <div className="space-y-3">
+                        {recentTransactions.map((transaction) => (
+                          <div key={transaction.id} className="flex justify-between items-center border-b pb-3">
+                            <div className="flex flex-col">
+                              <span className="font-medium">{transaction.description}</span>
+                              <div className="flex items-center text-sm text-muted-foreground">
+                                <span>{new Date(transaction.date).toLocaleDateString()}</span>
+                                <span className="mx-2">•</span>
+                                <span>{transaction?.category?.name}</span>
+                              </div>
+                            </div>
+                            <span className={`font-medium ${
+                              Number(transaction?.amount) >= 0 
+                                ? 'text-green-600' 
+                                : 'text-red-600'
+                            }`}>
+                              ${Math.abs(Number(transaction.amount)).toFixed(2)}
+                            </span>
+                          </div>
+                        ))}
+                        <div className="flex justify-end mt-3 pt-2">
+                          <Button variant="ghost" asChild size="sm">
+                            <Link href="/dashboard/transactions" className="flex items-center">
+                              View all
+                              <ArrowRight className="ml-2 h-4 w-4" />
+                            </Link>
+                          </Button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="text-center py-6 text-muted-foreground">
+                        No transactions found. Add your first transaction to get started.
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Quick Actions</CardTitle>
+                    <CardDescription>Common tasks to manage your finances</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid gap-2">
+                      <Button asChild variant="outline" className="justify-start">
+                        <Link href="/dashboard/transactions/create">
+                          <Plus className="mr-2 h-4 w-4" />
+                          Add a new transaction
+                        </Link>
+                      </Button>
+                      <Button asChild variant="outline" className="justify-start">
+                        <Link href="/dashboard/accounts/create">
+                          <Plus className="mr-2 h-4 w-4" />
+                          Create a new account
+                        </Link>
+                      </Button>
+                      <Button asChild variant="outline" className="justify-start">
+                        <Link href="/dashboard/categories">
+                          <Plus className="mr-2 h-4 w-4" />
+                          Manage your categories
+                        </Link>
+                      </Button>
+                      <Button asChild variant="outline" className="justify-start">
+                        <Link href="/dashboard/reports">
+                          <Plus className="mr-2 h-4 w-4" />
+                          View financial reports
+                        </Link>
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
               </div>
             </div>
           </div>
         </div>
-      </main>
-    </div>
+      </div>
+    </SidebarProvider>
   );
 }

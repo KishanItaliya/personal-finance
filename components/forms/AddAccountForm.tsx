@@ -1,17 +1,33 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useForm, Controller } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 // Define the validation schema using zod
 const accountSchema = z.object({
   name: z.string().min(1, { message: 'Account name is required' }),
-  type: z.enum(['CHECKING', 'SAVINGS', 'CREDIT', 'INVESTMENT', 'CASH', 'OTHER'], {
-    errorMap: () => ({ message: 'Please select an account type' }),
-  }),
+  type: z.string().min(1, { message: 'Account type is required' }),
   balance: z.string().min(1, { message: 'Balance is required' }),
   institution: z.string().optional(),
   accountNumber: z.string().optional(),
@@ -25,19 +41,36 @@ type AccountFormValues = z.infer<typeof accountSchema>;
 export default function AddAccountForm() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
+  const [accountTypes, setAccountTypes] = useState<{label: string, value: string}[]>([]);
+  const [isLoadingTypes, setIsLoadingTypes] = useState(true);
+  
+  // Fetch account types from API
+  useEffect(() => {
+    const fetchAccountTypes = async () => {
+      try {
+        // Fallback to schema-defined types since we don't have a dedicated API yet
+        setAccountTypes([
+          { value: 'CHECKING', label: 'Checking' },
+          { value: 'SAVINGS', label: 'Savings' },
+          { value: 'CREDIT', label: 'Credit Card' },
+          { value: 'INVESTMENT', label: 'Investment' },
+          { value: 'CASH', label: 'Cash' },
+          { value: 'OTHER', label: 'Other' },
+        ]);
+      } finally {
+        setIsLoadingTypes(false);
+      }
+    };
+
+    fetchAccountTypes();
+  }, []);
   
   // Initialize react-hook-form
-  const {
-    control,
-    handleSubmit,
-    watch,
-    reset,
-    formState: { errors }
-  } = useForm<AccountFormValues>({
+  const form = useForm<AccountFormValues>({
     resolver: zodResolver(accountSchema),
     defaultValues: {
       name: '',
-      type: 'CHECKING',
+      type: '',
       balance: '',
       institution: '',
       accountNumber: '',
@@ -47,7 +80,7 @@ export default function AddAccountForm() {
   });
   
   // Watch the account type to conditionally render fields
-  const accountType = watch('type');
+  const accountType = form.watch('type');
 
   const onSubmit = async (data: AccountFormValues) => {
     setIsLoading(true);
@@ -66,7 +99,7 @@ export default function AddAccountForm() {
       }
 
       // Reset form and refresh data
-      reset();
+      form.reset();
       router.refresh();
       router.push('/dashboard/accounts');
     } catch (error) {
@@ -76,148 +109,172 @@ export default function AddAccountForm() {
     }
   };
 
+  if (isLoadingTypes) {
+    return (
+      <div className="flex justify-center items-center p-8">
+        <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-indigo-500"></div>
+      </div>
+    );
+  }
+
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 p-4 bg-white rounded-lg shadow">
-      <h2 className="text-xl font-semibold">Add New Account</h2>
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700">Account Name</label>
-          <Controller
-            name="name"
-            control={control}
-            render={({ field }) => (
-              <input
-                type="text"
-                {...field}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+    <Card>
+      <CardHeader>
+        <CardTitle>Add New Account</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Account Name</FormLabel>
+                    <FormControl>
+                      <Input 
+                        {...field}
+                        placeholder="My Checking Account" 
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-            )}
-          />
-          {errors.name && (
-            <p className="mt-1 text-sm text-red-600">{errors.name.message}</p>
-          )}
-        </div>
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700">Account Type</label>
-          <Controller
-            name="type"
-            control={control}
-            render={({ field }) => (
-              <select
-                {...field}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-              >
-                <option value="CHECKING">Checking</option>
-                <option value="SAVINGS">Savings</option>
-                <option value="CREDIT">Credit Card</option>
-                <option value="INVESTMENT">Investment</option>
-                <option value="CASH">Cash</option>
-                <option value="OTHER">Other</option>
-              </select>
-            )}
-          />
-          {errors.type && (
-            <p className="mt-1 text-sm text-red-600">{errors.type.message}</p>
-          )}
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700">Balance</label>
-          <Controller
-            name="balance"
-            control={control}
-            render={({ field }) => (
-              <input
-                type="number"
-                step="0.01"
-                {...field}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+              <FormField
+                control={form.control}
+                name="type"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Account Type</FormLabel>
+                    <Select 
+                      onValueChange={field.onChange} 
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select Account Type" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {accountTypes.map((type) => (
+                          <SelectItem key={type.value} value={type.value}>
+                            {type.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-            )}
-          />
-          {errors.balance && (
-            <p className="mt-1 text-sm text-red-600">{errors.balance.message}</p>
-          )}
-        </div>
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700">Institution</label>
-          <Controller
-            name="institution"
-            control={control}
-            render={({ field }) => (
-              <input
-                type="text"
-                {...field}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+              <FormField
+                control={form.control}
+                name="balance"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Balance</FormLabel>
+                    <FormControl>
+                      <Input 
+                        type="number"
+                        step="0.01"
+                        {...field}
+                        placeholder="0.00" 
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-            )}
-          />
-        </div>
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700">Account Number</label>
-          <Controller
-            name="accountNumber"
-            control={control}
-            render={({ field }) => (
-              <input
-                type="text"
-                {...field}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+              <FormField
+                control={form.control}
+                name="institution"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Institution</FormLabel>
+                    <FormControl>
+                      <Input 
+                        {...field}
+                        placeholder="Bank Name" 
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-            )}
-          />
-        </div>
 
-        {(accountType === 'SAVINGS' || accountType === 'INVESTMENT') && (
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Interest Rate (%)</label>
-            <Controller
-              name="interestRate"
-              control={control}
-              render={({ field }) => (
-                <input
-                  type="number"
-                  step="0.01"
-                  {...field}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+              <FormField
+                control={form.control}
+                name="accountNumber"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Account Number</FormLabel>
+                    <FormControl>
+                      <Input 
+                        {...field}
+                        placeholder="Last 4 digits only" 
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {(accountType === 'SAVINGS' || accountType === 'INVESTMENT') && (
+                <FormField
+                  control={form.control}
+                  name="interestRate"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Interest Rate (%)</FormLabel>
+                      <FormControl>
+                        <Input 
+                          type="number"
+                          step="0.01"
+                          {...field}
+                          placeholder="0.00" 
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
                 />
               )}
-            />
-          </div>
-        )}
 
-        {accountType === 'CREDIT' && (
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Credit Limit</label>
-            <Controller
-              name="creditLimit"
-              control={control}
-              render={({ field }) => (
-                <input
-                  type="number"
-                  step="0.01"
-                  {...field}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+              {accountType === 'CREDIT' && (
+                <FormField
+                  control={form.control}
+                  name="creditLimit"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Credit Limit</FormLabel>
+                      <FormControl>
+                        <Input 
+                          type="number"
+                          step="0.01"
+                          {...field}
+                          placeholder="0.00" 
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
                 />
               )}
-            />
-          </div>
-        )}
-      </div>
+            </div>
 
-      <div className="flex justify-end">
-        <button
-          type="submit"
-          disabled={isLoading}
-          className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
-        >
-          {isLoading ? 'Saving...' : 'Add Account'}
-        </button>
-      </div>
-    </form>
+            <div className="flex justify-end">
+              <Button type="submit" disabled={isLoading}>
+                {isLoading ? 'Saving...' : 'Add Account'}
+              </Button>
+            </div>
+          </form>
+        </Form>
+      </CardContent>
+    </Card>
   );
 } 
