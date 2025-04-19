@@ -3,6 +3,9 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useForm, Controller } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 
 type Account = {
   id: string;
@@ -15,6 +18,20 @@ type Category = {
   type: string;
 };
 
+// Define the validation schema using zod
+const transactionSchema = z.object({
+  accountId: z.string().min(1, { message: 'Account is required' }),
+  categoryId: z.string().min(1, { message: 'Category is required' }),
+  amount: z.string().min(1, { message: 'Amount is required' }),
+  date: z.string().min(1, { message: 'Date is required' }),
+  description: z.string().min(1, { message: 'Description is required' }),
+  type: z.enum(['EXPENSE', 'INCOME', 'TRANSFER']),
+  merchant: z.string().optional(),
+});
+
+// Infer the type from the schema
+type TransactionFormValues = z.infer<typeof transactionSchema>;
+
 export default function AddTransactionForm({
   accounts,
   categories
@@ -24,23 +41,31 @@ export default function AddTransactionForm({
 }) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
-  const [formData, setFormData] = useState({
-    accountId: '',
-    categoryId: '',
-    amount: '',
-    date: new Date().toISOString().split('T')[0],
-    description: '',
-    type: 'EXPENSE',
-    merchant: '',
+  
+  // Initialize react-hook-form
+  const {
+    control,
+    handleSubmit,
+    watch,
+    reset,
+    formState: { errors }
+  } = useForm<TransactionFormValues>({
+    resolver: zodResolver(transactionSchema),
+    defaultValues: {
+      accountId: '',
+      categoryId: '',
+      amount: '',
+      date: new Date().toISOString().split('T')[0],
+      description: '',
+      type: 'EXPENSE',
+      merchant: '',
+    }
   });
+  
+  // Watch the transaction type to filter categories
+  const transactionType = watch('type');
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const onSubmit = async (data: TransactionFormValues) => {
     setIsLoading(true);
 
     try {
@@ -49,7 +74,7 @@ export default function AddTransactionForm({
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(data),
       });
 
       if (!response.ok) {
@@ -57,16 +82,7 @@ export default function AddTransactionForm({
       }
 
       // Reset form and refresh data
-      setFormData({
-        accountId: '',
-        categoryId: '',
-        amount: '',
-        date: new Date().toISOString().split('T')[0],
-        description: '',
-        type: 'EXPENSE',
-        merchant: '',
-      });
-      
+      reset();
       router.refresh();
     } catch (error) {
       console.error('Error adding transaction:', error);
@@ -76,114 +92,154 @@ export default function AddTransactionForm({
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 p-4 bg-white rounded-lg shadow">
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 p-4 bg-white rounded-lg shadow">
       <h2 className="text-xl font-semibold">Add New Transaction</h2>
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
           <label className="block text-sm font-medium text-gray-700">Type</label>
-          <select
+          <Controller
             name="type"
-            value={formData.type}
-            onChange={handleChange}
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-            required
-          >
-            <option value="EXPENSE">Expense</option>
-            <option value="INCOME">Income</option>
-            <option value="TRANSFER">Transfer</option>
-          </select>
+            control={control}
+            render={({ field }) => (
+              <select
+                {...field}
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+              >
+                <option value="EXPENSE">Expense</option>
+                <option value="INCOME">Income</option>
+                <option value="TRANSFER">Transfer</option>
+              </select>
+            )}
+          />
+          {errors.type && (
+            <p className="mt-1 text-sm text-red-600">{errors.type.message}</p>
+          )}
         </div>
 
         <div>
           <label className="block text-sm font-medium text-gray-700">Account</label>
-          <select
+          <Controller
             name="accountId"
-            value={formData.accountId}
-            onChange={handleChange}
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-            required
-          >
-            <option value="">Select Account</option>
-            {accounts.map(account => (
-              <option key={account.id} value={account.id}>
-                {account.name}
-              </option>
-            ))}
-          </select>
+            control={control}
+            render={({ field }) => (
+              <select
+                {...field}
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+              >
+                <option value="">Select Account</option>
+                {accounts.map(account => (
+                  <option key={account.id} value={account.id}>
+                    {account.name}
+                  </option>
+                ))}
+              </select>
+            )}
+          />
+          {errors.accountId && (
+            <p className="mt-1 text-sm text-red-600">{errors.accountId.message}</p>
+          )}
         </div>
 
         <div>
           <label className="block text-sm font-medium text-gray-700">Category</label>
-          <select
+          <Controller
             name="categoryId"
-            value={formData.categoryId}
-            onChange={handleChange}
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-            required
-          >
-            <option value="">Select Category</option>
-            {categories
-              .filter(cat => 
-                formData.type === 'INCOME' 
-                  ? cat.type === 'INCOME' 
-                  : cat.type === 'EXPENSE'
-              )
-              .map(category => (
-                <option key={category.id} value={category.id}>
-                  {category.name}
-                </option>
-              ))}
-          </select>
+            control={control}
+            render={({ field }) => (
+              <select
+                {...field}
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+              >
+                <option value="">Select Category</option>
+                {categories
+                  .filter(cat => 
+                    transactionType === 'INCOME' 
+                      ? cat.type === 'INCOME' 
+                      : cat.type === 'EXPENSE'
+                  )
+                  .map(category => (
+                    <option key={category.id} value={category.id}>
+                      {category.name}
+                    </option>
+                  ))}
+              </select>
+            )}
+          />
+          {errors.categoryId && (
+            <p className="mt-1 text-sm text-red-600">{errors.categoryId.message}</p>
+          )}
         </div>
 
         <div>
           <label className="block text-sm font-medium text-gray-700">Amount</label>
-          <input
-            type="number"
+          <Controller
             name="amount"
-            step="0.01"
-            value={formData.amount}
-            onChange={handleChange}
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-            required
+            control={control}
+            render={({ field }) => (
+              <input
+                type="number"
+                step="0.01"
+                {...field}
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+              />
+            )}
           />
+          {errors.amount && (
+            <p className="mt-1 text-sm text-red-600">{errors.amount.message}</p>
+          )}
         </div>
 
         <div>
           <label className="block text-sm font-medium text-gray-700">Date</label>
-          <input
-            type="date"
+          <Controller
             name="date"
-            value={formData.date}
-            onChange={handleChange}
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-            required
+            control={control}
+            render={({ field }) => (
+              <input
+                type="date"
+                {...field}
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+              />
+            )}
           />
+          {errors.date && (
+            <p className="mt-1 text-sm text-red-600">{errors.date.message}</p>
+          )}
         </div>
 
         <div>
           <label className="block text-sm font-medium text-gray-700">Merchant</label>
-          <input
-            type="text"
+          <Controller
             name="merchant"
-            value={formData.merchant}
-            onChange={handleChange}
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+            control={control}
+            render={({ field }) => (
+              <input
+                type="text"
+                {...field}
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+              />
+            )}
           />
         </div>
       </div>
 
       <div className="col-span-2">
         <label className="block text-sm font-medium text-gray-700">Description</label>
-        <input
-          type="text"
+        <Controller
           name="description"
-          value={formData.description}
-          onChange={handleChange}
-          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-          required
+          control={control}
+          render={({ field }) => (
+            <input
+              type="text"
+              {...field}
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+            />
+          )}
         />
+        {errors.description && (
+          <p className="mt-1 text-sm text-red-600">{errors.description.message}</p>
+        )}
       </div>
 
       <div className="flex justify-end">

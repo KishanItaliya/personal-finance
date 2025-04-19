@@ -1,93 +1,69 @@
-'use client';
-
-import { useEffect, useState } from 'react';
+import React from 'react';
 import AddTransactionForm from '@/components/forms/AddTransactionForm';
-import { useRouter } from 'next/navigation';
+import { Metadata } from 'next';
+import { prisma } from '@/lib/prisma';
+import { auth } from '@/auth';
 
-type Account = {
-  id: string;
-  name: string;
+export const metadata: Metadata = {
+  title: 'Create Transaction | Personal Finance Dashboard',
+  description: 'Create a new financial transaction',
 };
 
-type Category = {
-  id: string;
-  name: string;
-  type: string;
-};
-
-export default function CreateTransactionPage() {
-  const router = useRouter();
-  const [accounts, setAccounts] = useState<Account[]>([]);
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        // Fetch accounts and categories in parallel
-        const [accountsResponse, categoriesResponse] = await Promise.all([
-          fetch('/api/accounts'),
-          fetch('/api/categories')
-        ]);
-
-        if (!accountsResponse.ok || !categoriesResponse.ok) {
-          throw new Error('Failed to fetch data');
-        }
-
-        const [accountsData, categoriesData] = await Promise.all([
-          accountsResponse.json(),
-          categoriesResponse.json()
-        ]);
-
-        setAccounts(accountsData);
-        setCategories(categoriesData);
-      } catch (err) {
-        setError('Failed to load data. Please try again later.');
-        console.error('Error fetching data:', err);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchData();
-  }, []);
-
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500"></div>
-      </div>
-    );
-  }
-
-  if (error) {
+export default async function CreateTransactionPage() {
+  const session = await auth();
+  
+  if (!session?.user) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-red-500 text-center">
-          <p className="text-xl font-semibold">{error}</p>
-          <button
-            onClick={() => router.refresh()}
-            className="mt-4 px-4 py-2 bg-indigo-500 text-white rounded hover:bg-indigo-600"
-          >
-            Try Again
-          </button>
+          <p className="text-xl font-semibold">Unauthorized access</p>
+          <p className="mt-2">Please sign in to access this page.</p>
         </div>
       </div>
     );
   }
 
+  // Fetch accounts and categories for the form
+  const [accounts, categories] = await Promise.all([
+    prisma.account.findMany({
+      where: {
+        userId: session.user.id,
+        isActive: true,
+      },
+      select: {
+        id: true,
+        name: true,
+      },
+      orderBy: {
+        name: 'asc',
+      },
+    }),
+    prisma.category.findMany({
+      where: {
+        userId: session.user.id,
+      },
+      select: {
+        id: true,
+        name: true,
+        type: true,
+      },
+      orderBy: {
+        name: 'asc',
+      },
+    }),
+  ]);
+
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="max-w-3xl mx-auto">
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold text-gray-900">Add New Transaction</h1>
-          <button
-            onClick={() => router.back()}
+          <h1 className="text-2xl font-bold text-gray-900">Create New Transaction</h1>
+          <a
+            href="/dashboard/transactions"
             className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
           >
-            Back
-          </button>
+            Back to Transactions
+          </a>
         </div>
         
         <div className="bg-white rounded-lg shadow">
