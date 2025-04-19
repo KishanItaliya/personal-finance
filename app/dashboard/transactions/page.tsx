@@ -1,47 +1,49 @@
 // app/dashboard/transactions/page.tsx
 import { auth } from '@/auth';
-import { prisma } from '@/lib/prisma';
 import { redirect } from 'next/navigation';
 import TransactionList from '@/components/transactions/TransactionList';
+import { Plus } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import Link from 'next/link';
+import { dashboardRoutes } from '@/lib/routes';
+import { prisma } from '@/lib/prisma';
+import { Category, Account } from '@prisma/client';
 
-export default async function TransactionsPage({
-  searchParams
-}: {
-  searchParams: { accountId?: string; categoryId?: string; type?: string }
-}) {
+export default async function TransactionsPage() {
   const session = await auth();
   
   if (!session || !session.user) {
     redirect('/login');
   }
-  
+
   const userId = session.user.id;
-  const { accountId, categoryId, type } = searchParams;
-  
-  // Build the where clause
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const where: any = { userId };
-  
-  if (accountId) where.accountId = accountId;
-  if (categoryId) where.categoryId = categoryId;
-  if (type) where.type = type;
-  
-  // Get transactions
-  const transactions = await prisma.transaction.findMany({
-    where,
-    include: {
-      category: true,
-      account: true,
-    },
-    orderBy: {
-      date: 'desc',
-    },
-  });
+
+  // Fetch unique categories and accounts for filters
+  const categories = await prisma.category.findMany({
+    where: { userId },
+    select: { id: true, name: true },
+    orderBy: { name: 'asc' },
+  }) as Category[];
+
+  const accounts = await prisma.account.findMany({
+    where: { userId },
+    select: { id: true, name: true },
+    orderBy: { name: 'asc' },
+  }) as Account[];
   
   return (
-    <div className="container mx-auto py-8">
-      <h1 className="text-2xl font-bold mb-6">Transactions</h1>
-      <TransactionList transactions={transactions} />
-    </div>
+    <>
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-2xl font-bold">Transactions</h1>
+        <Button asChild>
+          <Link href={dashboardRoutes.transactions.create}>
+            <Plus className="h-4 w-4 mr-2" />
+            Add Transaction
+          </Link>
+        </Button>
+      </div>
+      
+      <TransactionList categories={categories} accounts={accounts} />
+    </>
   );
 }

@@ -7,10 +7,10 @@ import {
   CardContent, 
   CardDescription, 
   CardHeader, 
-  CardTitle 
+  CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Plus } from "lucide-react";
+import { ArrowRight, CreditCard, PiggyBank, Wallet, BriefcaseBusiness, DollarSign, Plus } from "lucide-react";
 import { dashboardRoutes, quickActionRoutes } from '@/lib/routes';
 import { formatCurrency, isPositiveAmount } from '@/lib/utils';
 
@@ -50,33 +50,75 @@ export default async function DashboardPage() {
   // Calculate total balance
   const totalBalance = accounts.reduce((sum, account) => sum + Number(account.balance), 0);
   
+  // Get account type icon
+  const getAccountIcon = (type: string) => {
+    switch(type) {
+      case 'CHECKING':
+        return <Wallet className="h-10 w-10 bg-blue-100 text-blue-500 rounded-full p-2" />;
+      case 'SAVINGS':
+        return <PiggyBank className="h-10 w-10 bg-teal-100 text-teal-500 rounded-full p-2" />;
+      case 'CREDIT':
+        return <CreditCard className="h-10 w-10 bg-purple-100 text-purple-500 rounded-full p-2" />;
+      case 'INVESTMENT':
+        return <BriefcaseBusiness className="h-10 w-10 bg-amber-100 text-amber-500 rounded-full p-2" />;
+      default:
+        return <DollarSign className="h-10 w-10 bg-gray-100 text-gray-500 rounded-full p-2" />;
+    }
+  };
+  
   return (
     <>
       <h1 className="text-2xl font-bold mb-6">Dashboard</h1>
       
-      <Card className="mb-6">
-        <CardHeader className="pb-3">
-          <CardTitle>Account Overview</CardTitle>
-          <CardDescription>
-            Your total balance: {formatCurrency(totalBalance)}
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <Card className="mb-6 overflow-hidden gap-4 bg-linear-to-r from-gray-300 via-gray-400 to-gray-500">
+        <div className="p-6 pt-0">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between">
+            <div>
+              <h3 className="text-lg font-medium text-muted-foreground">Total Balance</h3>
+              <p className="text-3xl font-bold mt-1">{formatCurrency(totalBalance)}</p>
+            </div>
+            <Button asChild className="mt-4 md:mt-0" variant="outline">
+              <Link href={dashboardRoutes.accounts.create}>
+                <Plus className="mr-2 h-4 w-4" />
+                Add Account
+              </Link>
+            </Button>
+          </div>
+        </div>
+        <CardContent className="pt-0">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {accounts?.map((account) => (
-              <Card key={account.id} className="bg-accent/10">
-                <CardContent className="p-4">
-                  <div className="text-sm font-medium text-muted-foreground">
-                    {account.name}
-                  </div>
-                  <div className="mt-1 text-2xl font-semibold">
-                    {formatCurrency(Number(account.balance))}
+              <Card key={account.id} className="overflow-hidden shadow-lg py-2">
+                <CardContent className="p-0">
+                  <div className="flex items-start p-4">
+                    <div className="mr-4">
+                      {getAccountIcon(account.type)}
+                    </div>
+                    <div className="flex-1">
+                      <h4 className="text-sm font-medium text-muted-foreground">
+                        {account.name}
+                      </h4>
+                      <p className="mt-1 text-xl font-semibold">
+                        {formatCurrency(Number(account.balance))}
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        {account.type.charAt(0) + account.type.slice(1).toLowerCase()} Account
+                      </p>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
             ))}
           </div>
         </CardContent>
+        {/* <CardFooter className="bg-muted/50 py-3 flex justify-end">
+          <Button variant="ghost" size="sm" asChild>
+            <Link href={dashboardRoutes.accounts.index} className="flex items-center text-sm text-muted-foreground">
+              View all accounts
+              <ArrowRight className="ml-2 h-3 w-3" />
+            </Link>
+          </Button>
+        </CardFooter> */}
       </Card>
       
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
@@ -88,7 +130,7 @@ export default async function DashboardPage() {
             </div>
             <Button asChild size="sm" variant="outline">
               <Link href={dashboardRoutes.transactions.create}>
-                <Plus className="h-4 w-4 mr-2" />
+                <Plus className="mr-2 h-4 w-4" />
                 Add
               </Link>
             </Button>
