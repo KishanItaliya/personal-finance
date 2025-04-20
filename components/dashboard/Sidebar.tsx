@@ -22,7 +22,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { User } from "lucide-react";
 import LogoutButton from '@/components/ui/LogoutButton';
-import { navItems, userMenuItems } from '@/lib/routes';
+import { navItems, userMenuItems, dashboardRoutes } from '@/lib/routes';
 
 interface DashboardSidebarProps {
   user: {
@@ -33,6 +33,23 @@ interface DashboardSidebarProps {
 
 export function DashboardSidebar({ user }: DashboardSidebarProps) {
   const pathname = usePathname();
+  
+  // Helper function to determine if a route is active
+  const isRouteActive = (path: string): boolean => {
+    // Handle dashboard root as a special case
+    if (path === dashboardRoutes.index) {
+      return pathname === dashboardRoutes.index;
+    }
+
+    // For exact matches
+    if (pathname === path) return true;
+    
+    // For subroutes (check if the pathname starts with the path)
+    // Only consider it a match if it's a subroute and not just a partial string match
+    if (path !== '/' && pathname.startsWith(path + '/')) return true;
+    
+    return false;
+  };
   
   return (
     <Sidebar>
@@ -45,7 +62,7 @@ export function DashboardSidebar({ user }: DashboardSidebarProps) {
             const Icon = item.icon;
             return (
               <SidebarMenuItem key={item.path}>
-                <SidebarMenuButton asChild isActive={pathname === item.path}>
+                <SidebarMenuButton asChild isActive={isRouteActive(item.path)}>
                   <Link href={item.path} className="flex items-center">
                     <Icon className="mx-2 h-5 w-5" />
                     {item.label}

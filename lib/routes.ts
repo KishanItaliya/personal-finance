@@ -63,7 +63,10 @@ export const dashboardRoutes = {
     edit: (id: string) => `/dashboard/goals/${id}/edit`,
     view: (id: string) => `/dashboard/goals/${id}`,
   },
-  insights: '/dashboard/insights',
+  insights: {
+    index: '/dashboard/insights',
+    advanced: '/dashboard/insights/advanced',
+  }
 };
 
 /**
@@ -84,6 +87,11 @@ export const quickActionRoutes = [
     icon: PlusCircle,
   },
   {
+    label: 'View financial insights',
+    path: dashboardRoutes.insights.index,
+    icon: PieChart,
+  },
+  {
     label: 'Create a new account',
     path: dashboardRoutes.accounts.create,
     icon: PlusCircle,
@@ -91,13 +99,8 @@ export const quickActionRoutes = [
   {
     label: 'Manage your categories',
     path: dashboardRoutes.categories.index,
-    icon: PlusCircle,
-  },
-  {
-    label: 'View financial reports',
-    path: dashboardRoutes.insights,
-    icon: PieChart,
-  },
+    icon: Calculator,
+  }, 
 ];
 
 /**
@@ -135,7 +138,7 @@ export const navItems = [
     icon: Target,
   },
   {
-    path: dashboardRoutes.insights,
+    path: dashboardRoutes.insights.index,
     label: 'Insights',
     icon: BarChart3,
   },
