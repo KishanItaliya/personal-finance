@@ -53,7 +53,6 @@ import {
   Tag, 
   Trash2,
   Pencil,
-  Loader2
 } from 'lucide-react';
 import Link from 'next/link';
 import { dashboardRoutes } from '@/lib/routes';
@@ -61,6 +60,7 @@ import { Badge } from '@/components/ui/badge';
 import { useQuery } from '@tanstack/react-query';
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import { Category, Account } from '@prisma/client';
+import { Loader } from "@/components/ui/loader";
 
 // Define Transaction Type enum since we're not importing it from Prisma to avoid name conflict
 enum TransactionTypeEnum {
@@ -280,12 +280,10 @@ export default function TransactionList({ categories, accounts }: { categories: 
   // Render loading state
   if (isLoading) {
     return (
-      <Card>
-        <CardContent className="flex justify-center items-center h-64">
-          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-          <span className="ml-2 text-muted-foreground">Loading transactions...</span>
-        </CardContent>
-      </Card>
+      <div className="flex justify-center items-center h-[60vh]">
+        <Loader size="lg" />
+        <span className="ml-4 text-muted-foreground">Loading transactions...</span>
+      </div>
     );
   }
 

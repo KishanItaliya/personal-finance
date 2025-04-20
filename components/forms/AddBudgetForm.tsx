@@ -35,6 +35,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
+import { Loader } from "@/components/ui/loader";
 
 type Category = {
   id: string;
@@ -404,7 +405,12 @@ export default function AddBudgetForm({
                 disabled={isLoading || remainingAmount < 0}
                 variant={remainingAmount < 0 ? "destructive" : "default"}
               >
-                {isLoading ? 'Saving...' : 'Create Budget'}
+                {isLoading ? (
+                  <span className="flex items-center">
+                    <Loader size="sm" className="mr-2" color="white" />
+                    Saving
+                  </span>
+                ) : 'Create Budget'}
               </Button>
             </div>
           </form>

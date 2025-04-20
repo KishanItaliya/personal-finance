@@ -34,6 +34,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
+import { Loader } from "@/components/ui/loader";
 
 // Define the validation schema using zod
 const goalSchema = z.object({
@@ -318,7 +319,12 @@ export default function AddGoalForm() {
 
             <div className="flex justify-end">
               <Button type="submit" disabled={isLoading}>
-                {isLoading ? 'Saving...' : 'Create Goal'}
+                {isLoading ? (
+                  <span className="flex items-center">
+                    <Loader size="sm" className="mr-2" color="white" />
+                    Saving
+                  </span>
+                ) : 'Create Goal'}
               </Button>
             </div>
           </form>

@@ -67,6 +67,10 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
+    // Convert empty strings to null for decimal fields
+    const parsedInterestRate = interestRate === '' ? null : interestRate;
+    const parsedCreditLimit = creditLimit === '' ? null : creditLimit;
+
     const account = await prisma.account.create({
       data: {
         name,
@@ -74,8 +78,8 @@ export async function POST(request: Request) {
         balance,
         institution,
         accountNumber,
-        interestRate,
-        creditLimit,
+        interestRate: parsedInterestRate,
+        creditLimit: parsedCreditLimit,
         userId: user.id
       }
     });
@@ -85,6 +89,58 @@ export async function POST(request: Request) {
     console.error('Error creating account:', error);
     return NextResponse.json(
       { error: 'Failed to create account' },
+      { status: 500 }
+    );
+  }
+}
+
+export async function DELETE(request: Request) {
+  try {
+    const session = await auth();
+    
+    if (!session?.user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    // Get account ID from URL params
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get('id');
+
+    if (!id) {
+      return NextResponse.json(
+        { error: 'Account ID is required' },
+        { status: 400 }
+      );
+    }
+
+    // Check if account exists and belongs to user
+    const account = await prisma.account.findUnique({
+      where: { 
+        id,
+        userId: session.user.id 
+      },
+    });
+
+    if (!account) {
+      return NextResponse.json(
+        { error: 'Account not found or unauthorized' },
+        { status: 404 }
+      );
+    }
+
+    // Delete the account
+    await prisma.account.delete({
+      where: { id }
+    });
+
+    return NextResponse.json(
+      { message: 'Account deleted successfully' },
+      { status: 200 }
+    );
+  } catch (error) {
+    console.error('Error deleting account:', error);
+    return NextResponse.json(
+      { error: 'Failed to delete account' },
       { status: 500 }
     );
   }

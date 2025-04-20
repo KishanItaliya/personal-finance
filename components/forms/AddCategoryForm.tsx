@@ -23,6 +23,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Loader } from "@/components/ui/loader";
 
 type CategoryParent = {
   id: string;
@@ -243,7 +244,12 @@ export default function AddCategoryForm({
 
             <div className="flex justify-end">
               <Button type="submit" disabled={isLoading}>
-                {isLoading ? 'Saving...' : 'Add Category'}
+                {isLoading ? (
+                  <span className="flex items-center">
+                    <Loader size="sm" className="mr-2" color="white" />
+                    Saving
+                  </span>
+                ) : 'Add Category'}
               </Button>
             </div>
           </form>

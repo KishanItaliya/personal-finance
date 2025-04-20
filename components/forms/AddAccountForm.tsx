@@ -23,6 +23,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Loader } from "@/components/ui/loader";
+import { dashboardRoutes } from '@/lib/routes';
 
 // Define the validation schema using zod
 const accountSchema = z.object({
@@ -86,12 +88,19 @@ export default function AddAccountForm() {
     setIsLoading(true);
 
     try {
+      // Convert empty strings to null for optional fields
+      const formattedData = {
+        ...data,
+        interestRate: data.interestRate === '' ? null : data.interestRate,
+        creditLimit: data.creditLimit === '' ? null : data.creditLimit
+      };
+
       const response = await fetch('/api/accounts', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(data),
+        body: JSON.stringify(formattedData),
       });
 
       if (!response.ok) {
@@ -101,7 +110,7 @@ export default function AddAccountForm() {
       // Reset form and refresh data
       form.reset();
       router.refresh();
-      router.push('/dashboard/accounts');
+      router.push(dashboardRoutes.accounts.index);
     } catch (error) {
       console.error('Error adding account:', error);
     } finally {
@@ -112,7 +121,7 @@ export default function AddAccountForm() {
   if (isLoadingTypes) {
     return (
       <div className="flex justify-center items-center p-8">
-        <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-indigo-500"></div>
+        <Loader size="md" center />
       </div>
     );
   }
@@ -125,7 +134,7 @@ export default function AddAccountForm() {
       <CardContent>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <FormField
                 control={form.control}
                 name="name"
@@ -154,7 +163,7 @@ export default function AddAccountForm() {
                       defaultValue={field.value}
                     >
                       <FormControl>
-                        <SelectTrigger>
+                        <SelectTrigger className="w-full">
                           <SelectValue placeholder="Select Account Type" />
                         </SelectTrigger>
                       </FormControl>
@@ -269,7 +278,12 @@ export default function AddAccountForm() {
 
             <div className="flex justify-end">
               <Button type="submit" disabled={isLoading}>
-                {isLoading ? 'Saving...' : 'Add Account'}
+                {isLoading ? (
+                  <span className="flex items-center">
+                    <Loader size="sm" className="mr-2" color="white" />
+                    Saving
+                  </span>
+                ) : 'Add Account'}
               </Button>
             </div>
           </form>

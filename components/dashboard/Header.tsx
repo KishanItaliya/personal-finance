@@ -81,7 +81,7 @@ export function DashboardHeader({ showAddTransactionButton = true }: DashboardHe
         </BreadcrumbList>
       </Breadcrumb>
       
-      {showAddTransactionButton && (
+      {/* {showAddTransactionButton && (
         <div className="ml-auto">
           <Button size="sm" variant="outline" asChild>
             <Link href={dashboardRoutes.transactions.create}>
@@ -90,7 +90,7 @@ export function DashboardHeader({ showAddTransactionButton = true }: DashboardHe
             </Link>
           </Button>
         </div>
-      )}
+      )} */}
     </div>
   );
 } 

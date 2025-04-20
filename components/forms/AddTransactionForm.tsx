@@ -35,6 +35,8 @@ import {
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import { toast } from 'sonner';
+import { Loader } from "@/components/ui/loader";
+import { dashboardRoutes } from '@/lib/routes';
 
 type Account = {
   id: string;
@@ -114,8 +116,8 @@ export default function AddTransactionForm({
 
       // Reset form and refresh data
       form.reset();
-      router.push('/dashboard/transactions');
       toast.success('Transaction added successfully');
+      router.push(dashboardRoutes.transactions.index);
     } catch (error) {
       console.error('Error adding transaction:', error);
       toast.error('Failed to add transaction');
@@ -328,7 +330,12 @@ export default function AddTransactionForm({
 
               <div className="flex justify-end">
                 <Button type="submit" disabled={isLoading}>
-                  {isLoading ? 'Saving...' : 'Add Transaction'}
+                  {isLoading ? (
+                    <span className="flex items-center">
+                      <Loader size="sm" className="mr-2" color="white" />
+                      Saving
+                    </span>
+                  ) : 'Add Transaction'}
                 </Button>
               </div>
             </form>
