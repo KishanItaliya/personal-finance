@@ -13,6 +13,7 @@ A modern, secure, and user-friendly personal finance management application buil
 - 🏷️ **Category Organization**: Organize transactions with customizable categories
 - 📈 **Visual Reports**: Analyze spending patterns through visual reports
 - 📱 **Responsive Design**: Optimized for all devices from mobile to desktop
+- 🔄 **Custom Loaders**: Consistent loading states across the application
 
 ## UI Components
 
@@ -27,6 +28,7 @@ This project uses [shadcn/ui](https://ui.shadcn.com/), a collection of reusable 
 - **Buttons**: Various button styles for different actions
 - **Tables**: Structured data presentation
 - **Inputs**: Form controls with proper validation states
+- **Loader**: Custom SyncLoader-style component for consistent loading states
 
 ## Tech Stack
 
@@ -107,7 +109,10 @@ personal-finance-dashboard/
 │   │   ├── AddCategoryForm.tsx
 │   │   ├── AddGoalForm.tsx
 │   │   └── AddTransactionForm.tsx
-│   └── ui/                    # UI components (shadcn/ui)
+│   ├── ui/                    # UI components (shadcn/ui)
+│   │   ├── loader.tsx         # Custom loader component
+│   │   └── ...                # Other UI components
+│   └── ...                    # Other component categories
 ├── lib/                       # Utility functions and configurations
 │   ├── prisma.ts              # Prisma client configuration
 │   └── utils.ts               # Utility functions
@@ -133,6 +138,25 @@ personal-finance-dashboard/
 - **Goals**: Set and monitor financial goals
 - **Reports**: View financial reports and analytics
 
+## Custom Components
+
+### Loader Component
+
+The application includes a custom loader component (`components/ui/loader.tsx`) that provides consistent loading states throughout the application:
+
+- Supports multiple sizes (sm, md, lg)
+- Customizable colors (indigo, blue, green, red, etc.)
+- Modeled after the popular SyncLoader style
+- Used in all forms, page loading states, and button loading states
+
+### Form Handling
+
+All form components and API routes include proper handling of optional decimal fields:
+
+- Empty string values for decimal fields (like interestRate, creditLimit) are converted to null
+- Prevents Prisma validation errors for empty decimal fields
+- Consistent handling of form submission data
+
 ## Available Scripts
 
 - `npm run dev` - Start development server
@@ -149,6 +173,13 @@ The application includes several form components:
 - **AddCategoryForm**: Create transaction categories
 - **AddBudgetForm**: Set up budgets with category allocations
 - **AddGoalForm**: Create financial goals with progress tracking
+
+## Recent Updates
+
+- Added custom Loader component with SyncLoader-style animation
+- Fixed handling of empty decimal fields in forms and API routes
+- Enhanced UI consistency with standardized loading states
+- Improved form validation and error handling
 
 ## Contributing
 
