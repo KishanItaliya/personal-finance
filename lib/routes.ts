@@ -8,7 +8,8 @@ import {
   UserCircle,
   Settings,
   LogOut,
-  PlusCircle
+  PlusCircle,
+  PieChart
 } from "lucide-react";
 
 /**
@@ -62,7 +63,7 @@ export const dashboardRoutes = {
     edit: (id: string) => `/dashboard/goals/${id}/edit`,
     view: (id: string) => `/dashboard/goals/${id}`,
   },
-  reports: '/dashboard/reports',
+  insights: '/dashboard/insights',
 };
 
 /**
@@ -94,8 +95,8 @@ export const quickActionRoutes = [
   },
   {
     label: 'View financial reports',
-    path: dashboardRoutes.reports,
-    icon: PlusCircle,
+    path: dashboardRoutes.insights,
+    icon: PieChart,
   },
 ];
 
@@ -134,8 +135,8 @@ export const navItems = [
     icon: Target,
   },
   {
-    path: dashboardRoutes.reports,
-    label: 'Reports',
+    path: dashboardRoutes.insights,
+    label: 'Insights',
     icon: BarChart3,
   },
 ];

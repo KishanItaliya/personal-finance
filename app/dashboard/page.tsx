@@ -46,7 +46,6 @@ export default async function DashboardPage() {
     },
     take: 5,
   });
-  
   // Calculate total balance
   const totalBalance = accounts.reduce((sum, account) => sum + Number(account.balance), 0);
   
