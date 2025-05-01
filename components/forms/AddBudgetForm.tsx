@@ -34,7 +34,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { cn } from "@/lib/utils";
+import { cn, formatCurrency } from "@/lib/utils";
 import { Loader } from "@/components/ui/loader";
 
 type Category = {
@@ -116,11 +116,14 @@ export default function AddBudgetForm({
     setIsLoading(true);
 
     try {
-      // Format dates for API
+      // Format budget data for API
       const formattedData = {
         ...data,
-        startDate: data.startDate.toISOString().split('T')[0],
-        endDate: data.endDate.toISOString().split('T')[0],
+        totalAmount: data.totalAmount,
+        budgetCategories: data.budgetCategories.map(category => ({
+          categoryId: category.categoryId,
+          plannedAmount: category.plannedAmount
+        }))
       };
 
       const response = await fetch('/api/budgets', {
@@ -132,15 +135,17 @@ export default function AddBudgetForm({
       });
 
       if (!response.ok) {
-        throw new Error('Failed to create budget');
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to create budget');
       }
 
-      // Reset form and refresh data
+      // Reset form and redirect to budgets page
       form.reset();
       router.refresh();
       router.push('/dashboard/budgets');
     } catch (error) {
       console.error('Error adding budget:', error);
+      // Could add toast notification here
     } finally {
       setIsLoading(false);
     }
@@ -186,7 +191,7 @@ export default function AddBudgetForm({
                       defaultValue={field.value}
                     >
                       <FormControl>
-                        <SelectTrigger>
+                        <SelectTrigger className="w-full">
                           <SelectValue placeholder="Select Period" />
                         </SelectTrigger>
                       </FormControl>
@@ -284,7 +289,7 @@ export default function AddBudgetForm({
                 control={form.control}
                 name="totalAmount"
                 render={({ field }) => (
-                  <FormItem className="col-span-full">
+                  <FormItem className="col-span">
                     <FormLabel>Total Budget Amount</FormLabel>
                     <FormControl>
                       <Input 
@@ -317,10 +322,10 @@ export default function AddBudgetForm({
               <div className="flex justify-between items-center mb-4">
                 <div className="flex gap-2 items-center">
                   <Badge variant={remainingAmount < 0 ? "destructive" : "outline"}>
-                    Allocated: ${allocatedAmount.toFixed(2)}
+                    Allocated: {formatCurrency(allocatedAmount)}
                   </Badge>
                   <Badge variant={remainingAmount < 0 ? "destructive" : "secondary"}>
-                    Remaining: ${remainingAmount.toFixed(2)}
+                    Remaining: {formatCurrency(remainingAmount)}
                   </Badge>
                 </div>
               </div>
