@@ -1,0 +1,65 @@
+{
+  "version": "1.0",
+  "rules": [
+    {
+      "name": "Project Overview",
+      "description": "Personal Finance Dashboard - A web application for tracking personal finances",
+      "type": "info"
+    },
+    {
+      "name": "Code Style",
+      "description": "Follow existing code style in the codebase. Use TypeScript and NextJS conventions.",
+      "type": "instruction"
+    },
+    {
+      "name": "Preferred Libraries",
+      "description": "Use existing libraries from package.json. Don't suggest new dependencies unless necessary.",
+      "type": "instruction"
+    },
+    {
+      "name": "Response Format",
+      "description": "Be concise and direct. Focus on implementation details rather than explanations.",
+      "type": "instruction"
+    },
+    {
+      "name": "File Structure",
+      "description": "Follow NextJS app directory structure. Components in /components, hooks in /hooks, API services in /services.",
+      "type": "instruction"
+    },
+    {
+      "name": "Testing Approach",
+      "description": "Suggest tests when implementing new features. Use existing testing patterns.",
+      "type": "instruction"
+    },
+    {
+      "name": "Commit Guidelines",
+      "description": "Write descriptive commit messages following conventional commits format.",
+      "type": "instruction"
+    },
+    {
+      "name": "Error Handling",
+      "description": "Implement proper error handling with try/catch blocks and meaningful error messages.",
+      "type": "instruction"
+    },
+    {
+      "name": "API Integration",
+      "description": "Use services directory for API calls. Follow existing patterns for data fetching.",
+      "type": "instruction"
+    },
+    {
+      "name": "State Management",
+      "description": "Use React hooks for component state. Consider context or libraries for global state.",
+      "type": "instruction"
+    },
+    {
+      "name": "Accessibility",
+      "description": "Ensure components are accessible. Use semantic HTML and ARIA attributes when needed.",
+      "type": "instruction"
+    },
+    {
+      "name": "Performance",
+      "description": "Optimize components for performance. Use memoization and avoid unnecessary renders.",
+      "type": "instruction"
+    }
+  ]
+} 

@@ -1,0 +1,54 @@
+{
+  "templates": [
+    {
+      "name": "Create Component",
+      "prompt": "Create a new React component named {{componentName}} that {{functionality}}. Make it type-safe and follow our project's component structure.",
+      "variables": ["componentName", "functionality"]
+    },
+    {
+      "name": "Fix Bug",
+      "prompt": "There's a bug in {{filePath}} where {{bugDescription}}. Please help me fix it.",
+      "variables": ["filePath", "bugDescription"]
+    },
+    {
+      "name": "Add Feature",
+      "prompt": "Help me implement a new feature: {{featureDescription}}. It should integrate with our existing codebase.",
+      "variables": ["featureDescription"]
+    },
+    {
+      "name": "Code Review",
+      "prompt": "Review the code in {{filePath}} for any issues, potential bugs, or improvements.",
+      "variables": ["filePath"]
+    },
+    {
+      "name": "Optimize Performance",
+      "prompt": "The component in {{filePath}} is performing slowly. Help me optimize it by {{optimizationGoal}}.",
+      "variables": ["filePath", "optimizationGoal"]
+    },
+    {
+      "name": "Add Type Safety",
+      "prompt": "Improve type safety in {{filePath}} by adding proper TypeScript types and interfaces.",
+      "variables": ["filePath"]
+    },
+    {
+      "name": "Create API Service",
+      "prompt": "Create a new API service for {{endpointName}} that handles {{functionality}}. Include proper error handling and typing.",
+      "variables": ["endpointName", "functionality"]
+    },
+    {
+      "name": "Add Unit Test",
+      "prompt": "Write unit tests for the {{componentOrFunction}} in {{filePath}}. Cover the main functionality and edge cases.",
+      "variables": ["componentOrFunction", "filePath"]
+    },
+    {
+      "name": "Refactor Code",
+      "prompt": "Refactor the code in {{filePath}} to improve {{improvementGoal}} while maintaining the same functionality.",
+      "variables": ["filePath", "improvementGoal"]
+    },
+    {
+      "name": "Documentation",
+      "prompt": "Write documentation for {{codeElement}} explaining how it works, its parameters, and usage examples.",
+      "variables": ["codeElement"]
+    }
+  ]
+} 

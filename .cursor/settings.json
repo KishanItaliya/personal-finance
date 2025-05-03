@@ -1,0 +1,32 @@
+{
+  "aiSettings": {
+    "codeCompletion": {
+      "enabled": true,
+      "language": {
+        "typescript": true,
+        "javascript": true,
+        "typescriptreact": true,
+        "javascriptreact": true
+      },
+      "autoTrigger": true
+    },
+    "chat": {
+      "model": "claude-3-sonnet-20240229",
+      "temperature": 0.7,
+      "conversationPersistence": true,
+      "maxTokensToSample": 4000
+    },
+    "codeBlocks": {
+      "wrapCodeBlocks": true,
+      "syntaxHighlighting": true
+    },
+    "autoFormatting": {
+      "enabled": true,
+      "formatOnSave": true
+    },
+    "suggestions": {
+      "importCompletion": true,
+      "variableNameSuggestions": true
+    }
+  }
+} 
