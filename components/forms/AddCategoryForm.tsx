@@ -24,6 +24,9 @@ import {
 } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader } from "@/components/ui/loader";
+import { announceToScreenReader } from '@/lib/a11y';
+import { KeyboardNav, KeyAction } from '@/components/a11y/KeyboardNav';
+import { ScreenReaderText } from '@/components/a11y/ScreenReaderText';
 
 type CategoryParent = {
   id: string;
@@ -84,12 +87,16 @@ export default function AddCategoryForm({
         throw new Error('Failed to create category');
       }
 
+      // Announce success to screen readers
+      announceToScreenReader('Category created successfully');
+      
       // Reset form and refresh data
       form.reset();
       router.refresh();
       router.push('/dashboard/categories');
     } catch (error) {
       console.error('Error adding category:', error);
+      announceToScreenReader('Error creating category. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -109,6 +116,46 @@ export default function AddCategoryForm({
     { value: '#EC4899', label: 'Pink' },
   ];
 
+  // Create keyboard navigation actions for color picker
+  const colorKeyboardActions: KeyAction[] = [
+    { key: "ArrowRight", action: () => navigateColorPicker(1) },
+    { key: "ArrowLeft", action: () => navigateColorPicker(-1) },
+    { key: "ArrowDown", action: () => navigateColorPicker(5) }, // Move down a row (5 colors per row)
+    { key: "ArrowUp", action: () => navigateColorPicker(-5) }, // Move up a row
+    { key: "Enter", action: () => selectFocusedColor() },
+    { key: " ", action: () => selectFocusedColor() } // Space key
+  ];
+
+  // State to track focused color in keyboard navigation
+  const [focusedColorIndex, setFocusedColorIndex] = useState(-1);
+  
+  // Function to navigate through colors with keyboard
+  const navigateColorPicker = (direction: number) => {
+    let newIndex = focusedColorIndex + direction;
+    
+    // Handle wrapping around
+    if (newIndex < 0) {
+      newIndex = colorOptions.length - 1;
+    } else if (newIndex >= colorOptions.length) {
+      newIndex = 0;
+    }
+    
+    setFocusedColorIndex(newIndex);
+    
+    // Announce the color to screen readers
+    if (newIndex >= 0 && newIndex < colorOptions.length) {
+      announceToScreenReader(`Selected ${colorOptions[newIndex].label}`);
+    }
+  };
+  
+  // Function to select the currently focused color
+  const selectFocusedColor = () => {
+    if (focusedColorIndex >= 0 && focusedColorIndex < colorOptions.length) {
+      form.setValue('color', colorOptions[focusedColorIndex].value);
+      announceToScreenReader(`Color set to ${colorOptions[focusedColorIndex].label}`);
+    }
+  };
+
   // Filter parent categories based on selected type
   const filteredParentCategories = parentCategories.filter(
     category => category.type === categoryType
@@ -121,18 +168,25 @@ export default function AddCategoryForm({
       </CardHeader>
       <CardContent>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          <form 
+            onSubmit={form.handleSubmit(onSubmit)} 
+            className="space-y-6"
+            aria-labelledby="form-heading"
+          >
+            <h2 id="form-heading" className="sr-only">Category Information Form</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <FormField
                 control={form.control}
                 name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Category Name</FormLabel>
+                    <FormLabel htmlFor="category-name">Category Name</FormLabel>
                     <FormControl>
                       <Input 
                         {...field}
+                        id="category-name"
                         placeholder="e.g., Groceries, Rent, Salary" 
+                        aria-required="true"
                       />
                     </FormControl>
                     <FormMessage />
@@ -145,13 +199,13 @@ export default function AddCategoryForm({
                 name="type"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Category Type</FormLabel>
+                    <FormLabel htmlFor="category-type">Category Type</FormLabel>
                     <Select 
                       onValueChange={field.onChange} 
                       defaultValue={field.value}
                     >
                       <FormControl>
-                        <SelectTrigger>
+                        <SelectTrigger id="category-type">
                           <SelectValue placeholder="Select Category Type" />
                         </SelectTrigger>
                       </FormControl>
@@ -170,23 +224,41 @@ export default function AddCategoryForm({
                 name="color"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Color</FormLabel>
+                    <FormLabel id="color-picker-label">Color</FormLabel>
                     <FormControl>
-                      <div className="mt-1 grid grid-cols-5 gap-2">
-                        {colorOptions.map((color) => (
-                          <div
-                            key={color.value}
-                            onClick={() => field.onChange(color.value)}
-                            className={`w-8 h-8 rounded-full cursor-pointer border-2 ${
-                              field.value === color.value
-                                ? 'border-gray-800'
-                                : 'border-transparent'
-                            }`}
-                            style={{ backgroundColor: color.value }}
-                            title={color.label}
-                          ></div>
-                        ))}
-                      </div>
+                      <KeyboardNav actions={colorKeyboardActions}>
+                        <div 
+                          role="radiogroup"
+                          aria-labelledby="color-picker-label"
+                          className="mt-1 grid grid-cols-5 gap-2"
+                          tabIndex={0}
+                        >
+                          {colorOptions.map((color, index) => (
+                            <div
+                              key={color.value}
+                              role="radio"
+                              aria-checked={field.value === color.value}
+                              tabIndex={index === focusedColorIndex ? 0 : -1}
+                              onClick={() => {
+                                field.onChange(color.value);
+                                announceToScreenReader(`Selected ${color.label}`);
+                              }}
+                              onFocus={() => setFocusedColorIndex(index)}
+                              className={`w-8 h-8 rounded-full cursor-pointer border-2 ${
+                                field.value === color.value
+                                  ? 'border-gray-800 dark:border-white'
+                                  : 'border-transparent'
+                              } focus:outline-none focus:ring-2 focus:ring-primary`}
+                              style={{ backgroundColor: color.value }}
+                              aria-label={color.label}
+                            >
+                              <ScreenReaderText>
+                                {color.label} color
+                              </ScreenReaderText>
+                            </div>
+                          ))}
+                        </div>
+                      </KeyboardNav>
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -198,10 +270,11 @@ export default function AddCategoryForm({
                 name="icon"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Icon (optional)</FormLabel>
+                    <FormLabel htmlFor="category-icon">Icon (optional)</FormLabel>
                     <FormControl>
                       <Input 
                         {...field}
+                        id="category-icon"
                         placeholder="Icon name or emoji" 
                       />
                     </FormControl>
@@ -216,13 +289,13 @@ export default function AddCategoryForm({
                   name="parentCategoryId"
                   render={({ field }) => (
                     <FormItem className="col-span-full">
-                      <FormLabel>Parent Category (optional)</FormLabel>
+                      <FormLabel htmlFor="parent-category">Parent Category (optional)</FormLabel>
                       <Select 
                         onValueChange={field.onChange} 
                         defaultValue={field.value}
                       >
                         <FormControl>
-                          <SelectTrigger>
+                          <SelectTrigger id="parent-category">
                             <SelectValue placeholder="None (Top Level Category)" />
                           </SelectTrigger>
                         </FormControl>
@@ -243,13 +316,17 @@ export default function AddCategoryForm({
             </div>
 
             <div className="flex justify-end">
-              <Button type="submit" disabled={isLoading}>
+              <Button 
+                type="submit" 
+                disabled={isLoading}
+                aria-busy={isLoading}
+              >
                 {isLoading ? (
                   <span className="flex items-center">
-                    <Loader size="sm" className="mr-2" color="white" />
+                    <Loader size="sm" className="mr-2" color="white" aria-hidden="true" />
                     Saving
                   </span>
-                ) : 'Add Category'}
+                ) : 'Save Category'}
               </Button>
             </div>
           </form>

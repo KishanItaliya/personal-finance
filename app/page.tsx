@@ -3,7 +3,7 @@ import Image from "next/image";
 export default function Home() {
   return (
     <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
+      <main id="main-content" className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
         <Image
           className="dark:invert"
           src="/next.svg"
@@ -31,13 +31,15 @@ export default function Home() {
             href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
             target="_blank"
             rel="noopener noreferrer"
+            aria-label="Deploy to Vercel"
           >
             <Image
-              className="dark:invert"
               src="/vercel.svg"
-              alt="Vercel logomark"
+              alt=""
+              aria-hidden="true"
               width={20}
               height={20}
+              className="dark:invert"
             />
             Deploy now
           </a>
@@ -51,7 +53,7 @@ export default function Home() {
           </a>
         </div>
       </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
+      <footer role="contentinfo" className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
         <a
           className="flex items-center gap-2 hover:underline hover:underline-offset-4"
           href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
@@ -59,9 +61,9 @@ export default function Home() {
           rel="noopener noreferrer"
         >
           <Image
-            aria-hidden
             src="/file.svg"
-            alt="File icon"
+            alt=""
+            aria-hidden="true"
             width={16}
             height={16}
           />
@@ -74,9 +76,9 @@ export default function Home() {
           rel="noopener noreferrer"
         >
           <Image
-            aria-hidden
             src="/window.svg"
-            alt="Window icon"
+            alt=""
+            aria-hidden="true"
             width={16}
             height={16}
           />
@@ -89,9 +91,9 @@ export default function Home() {
           rel="noopener noreferrer"
         >
           <Image
-            aria-hidden
             src="/globe.svg"
-            alt="Globe icon"
+            alt=""
+            aria-hidden="true"
             width={16}
             height={16}
           />

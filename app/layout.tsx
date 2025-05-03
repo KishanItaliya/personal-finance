@@ -4,6 +4,7 @@ import { Providers } from './providers';
 import './globals.css';
 import AuthProvider from '@/components/auth/AuthProvider';
 import { Toaster } from "@/components/ui/sonner"
+import SkipLink from '@/components/a11y/SkipLink';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -20,6 +21,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
+        <SkipLink targetId="main-content" />
         <Providers>
           <AuthProvider>
             {children}

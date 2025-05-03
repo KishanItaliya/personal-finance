@@ -19,16 +19,20 @@ export default async function DashboardLayout({
   return (
     <SidebarProvider>
       <div className="flex h-screen w-full">
-        <DashboardSidebar user={session.user} />
+        <nav aria-label="Main Navigation">
+          <DashboardSidebar user={session.user} />
+        </nav>
         
         <div className="flex-1 flex flex-col">
-          <DashboardHeader />
+          <header>
+            <DashboardHeader />
+          </header>
           
-          <div className="flex-1 overflow-auto">
+          <main id="main-content" className="flex-1 overflow-auto">
             <div className="px-6 py-6 max-w-7xl mx-auto w-full">
               {children}
             </div>
-          </div>
+          </main>
         </div>
       </div>
     </SidebarProvider>
